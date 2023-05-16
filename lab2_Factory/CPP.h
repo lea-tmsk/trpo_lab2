@@ -1,6 +1,7 @@
 #ifndef CPP_H
 #define CPP_H
 #include "unit.h"
+#include <algorithm>
 
 class CppMethodUnit : public MethodUnit {
 public:
@@ -9,7 +10,7 @@ public:
         CONST = 1 << 1,
         VIRTUAL = 1 << 2
     };
-public:
+
     CppMethodUnit(const std::string& name, const std::string& returnType, Flags flags) :
         MethodUnit(name, returnType, flags) {}
 
@@ -29,7 +30,8 @@ public:
             result += " const";
         }
 
-        result += " {\n";
+        result += " {\n\n";
+std::vector<std::shared_ptr<Unit>> _body = getBody();
 
         for (const auto& b : getBody()) {
             result += b->compile(level + 1);
@@ -43,24 +45,19 @@ public:
 class CppClassUnit : public ClassUnit
 {
 public:
-    enum AccessModifier {
-        PUBLIC,
-        PROTECTED,
-        PRIVATE
-    };
-    static const std::vector<std::string> ACCESS_MODIFIERS;
-public:
     CppClassUnit(const std::string& name) : ClassUnit(name) {}
 
     std::string compile(unsigned int level = 0) const {
         std::string result = generateShift(level) + "class " + getName() + " {\n";
-
+        std::vector<std::string> CPPModifiers = {"public", "protected", "private"};
         for (size_t i = 0; i < ACCESS_MODIFIERS.size(); ++i) {
             if (getFields(i).empty()) {
                 continue;
             }
 
-            result += ACCESS_MODIFIERS[i] + ":\n";
+            if (std::find(CPPModifiers.begin(), CPPModifiers.end(), ACCESS_MODIFIERS[i])!= CPPModifiers.end()) {
+                result += ACCESS_MODIFIERS[i] + ":\n";
+            }
 
             for(const auto& f : getFields(i)) {
                 result += f->compile(level + 1);
@@ -73,14 +70,14 @@ public:
     }
 };
 
-const std::vector<std::string> CppClassUnit::ACCESS_MODIFIERS = {"public", "protected", "private"};
+//const std::vector<std::string> CppClassUnit::ACCESS_MODIFIERS = {"public", "protected", "private"};
 
 class CppPrintOperatorUnit : public PrintOperatorUnit {
 public:
     explicit CppPrintOperatorUnit(const std::string& text) : PrintOperatorUnit(text) {}
 
     std::string compile(unsigned int level = 0) const {
-        return generateShift(level) + "printf( \"" + getText() + "\" );\n";
+        return generateShift(level) + "printf(\"" + getText() + "\");\n";
     }
 };
 

@@ -8,10 +8,14 @@ class Unit {
 public:
     using Flags = unsigned int;
     virtual ~Unit() = default;
-    virtual void add(const std::shared_ptr<Unit>&, Flags) {
+
+    virtual void add(const std::shared_ptr<Unit>&) {
         throw std::runtime_error("Not supported");
     }
     virtual std::string compile(unsigned int level = 0) const = 0;
+    virtual Flags getFlags() const {
+        return 0;
+    }
 
 protected:
     virtual std::string generateShift(unsigned int level) const {
@@ -29,11 +33,20 @@ public:
     enum Modifier {
         STATIC = 1,
         CONST = 1 << 1,
-        VIRTUAL = 1 << 2
+        VIRTUAL = 1 << 2,
+        FINAL = 1 << 3,
+        ABSTRACT = 1 << 4,
+        PUBLIC = 1 << 5,
+        PROTECTED = 1 << 6,
+        PRIVATE = 1 << 7,
+        PRIVATE_PROTECTED = 1 << 8,
+        PROTECTED_INTERNAL = 1 << 9,
+        INTERNAL = 1 << 10
     };
     MethodUnit(const std::string& name, const std::string& returnType, Flags flags) :
     m_name(name), m_returnType(returnType), m_flags(flags) {};
-    void add(const std::shared_ptr<Unit>& unit, Flags flags = 0 ) {
+
+    void add(const std::shared_ptr<Unit>& unit) {
         m_body.push_back(unit);
     }
 
@@ -62,21 +75,33 @@ class ClassUnit : public Unit
 {
 public:
     enum AccessModifier {
-        PUBLIC,
-        PROTECTED,
-        PRIVATE
-    };
-    using Fields = std::vector<std::shared_ptr<Unit>>;
+            PUBLIC,
+            PROTECTED,
+            PROTECTED_INTERNAL,
+            INTERNAL,
+            PRIVATE,
+            PRIVATE_PROTECTED
+        };
 
     static const std::vector<std::string> ACCESS_MODIFIERS;
+    using Fields = std::vector<std::shared_ptr<Unit>>;
 
     explicit ClassUnit(const std::string& name) : m_name(name) {
         m_fields.resize(ACCESS_MODIFIERS.size());
     }
-    void add(const std::shared_ptr<Unit>& unit, Flags flags) {
+    void add(const std::shared_ptr<Unit>& unit) {
         int accessModifier = PRIVATE;
-        if (flags < ACCESS_MODIFIERS.size()) {
-            accessModifier = flags;
+        Flags flags = unit->getFlags();
+        if (flags & MethodUnit::PUBLIC) {
+            accessModifier = PUBLIC;
+        } else if (flags & MethodUnit::PROTECTED) {
+            accessModifier = PRIVATE;
+        } else if (flags & MethodUnit::PRIVATE_PROTECTED) {
+            accessModifier = PRIVATE_PROTECTED;
+        } else if (flags & MethodUnit::INTERNAL) {
+            accessModifier = INTERNAL;
+        } else if (flags & MethodUnit::PROTECTED_INTERNAL) {
+            accessModifier = PROTECTED_INTERNAL;
         }
 
         m_fields[accessModifier].push_back(unit);
@@ -87,7 +112,7 @@ protected:
         return m_name;
     }
 
-    const Fields& getFields( unsigned int accessGroup ) const {
+    const Fields& getFields(unsigned int accessGroup) const {
         if (ACCESS_MODIFIERS.size() <= accessGroup) {
             throw std::out_of_range("Invalid access group index");
         }
@@ -99,11 +124,11 @@ private:
     std::vector<Fields> m_fields;
 };
 
-const std::vector< std::string > ClassUnit::ACCESS_MODIFIERS = {"public", "protected", "private"};
+const std::vector<std::string> ClassUnit::ACCESS_MODIFIERS = {"public", "protected", "protected internal", "internal", "private", "private protected"};
 
 class PrintOperatorUnit : public Unit {
 public:    
-    explicit PrintOperatorUnit(const std::string& text) : m_text( text ) {}
+    explicit PrintOperatorUnit(const std::string& text) : m_text(text) {}
 
 protected:
     std::string getText() const {
@@ -117,7 +142,7 @@ class ClassFactory {
 public:
     virtual ~ClassFactory() = default;
     using Flags = unsigned int;
-//    virtual Unit* createUnit() = 0;
+
     virtual std::unique_ptr<MethodUnit> createMethodUnit(const std::string& name, const std::string& returnType, Flags flags) const = 0;
     virtual std::unique_ptr<ClassUnit> createClassUnit(const std::string& name) const = 0;
     virtual std::unique_ptr<PrintOperatorUnit> createPrintOperatorUnit(const std::string& text) const = 0;
