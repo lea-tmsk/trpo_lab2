@@ -62,7 +62,6 @@ public:
             for(const auto& f : getFields(i)) {
                 result += f->compile(level + 1);
             }
-                result += "\n";
         }
 
         result += generateShift(level) + "};\n";

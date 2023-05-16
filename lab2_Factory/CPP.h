@@ -30,14 +30,14 @@ public:
             result += " const";
         }
 
-        result += " {\n\n";
+        result += " {\n";
 std::vector<std::shared_ptr<Unit>> _body = getBody();
 
         for (const auto& b : getBody()) {
             result += b->compile(level + 1);
         }
 
-        result += generateShift(level) + "}\n";
+        result += generateShift(level) + "}\n\n";
         return result;
     }
 };
@@ -62,15 +62,12 @@ public:
             for(const auto& f : getFields(i)) {
                 result += f->compile(level + 1);
             }
-                result += "\n";
         }
 
         result += generateShift(level) + "};\n";
         return result;
     }
 };
-
-//const std::vector<std::string> CppClassUnit::ACCESS_MODIFIERS = {"public", "protected", "private"};
 
 class CppPrintOperatorUnit : public PrintOperatorUnit {
 public:
