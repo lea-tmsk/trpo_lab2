@@ -31,7 +31,6 @@ public:
         }
 
         result += " {\n";
-std::vector<std::shared_ptr<Unit>> _body = getBody();
 
         for (const auto& b : getBody()) {
             result += b->compile(level + 1);

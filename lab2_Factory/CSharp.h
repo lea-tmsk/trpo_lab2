@@ -4,7 +4,6 @@
 
 class CSharpMethodUnit : public MethodUnit {
 public:
-
     CSharpMethodUnit(const std::string& name, const std::string& returnType, Flags flags) :
         MethodUnit(name, returnType, flags) {}
 
