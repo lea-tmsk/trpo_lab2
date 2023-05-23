@@ -24,7 +24,6 @@ std::string generateProgram(const std::shared_ptr<ClassFactory> &factory) {
 
 int main(int argc, char *argv[])
 {
-    CppClassFactory f1;
     QCoreApplication a(argc, argv);
     std::cout << "C++: \n\n" << generateProgram(std::make_shared<CppClassFactory>()) << std::endl;
     std::cout << "C#: \n\n" << generateProgram(std::make_shared<CSharpClassFactory>()) << std::endl;
