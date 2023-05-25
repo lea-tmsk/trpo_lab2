@@ -49,7 +49,9 @@ public:
     void add(const std::shared_ptr<Unit>& unit) {
         m_body.push_back(unit);
     }
-
+    std::string compile(unsigned int level = 0) const {
+        throw std::runtime_error("Not supported");
+    }
 protected:
     std::string getName() const {
         return m_name;
@@ -107,6 +109,10 @@ public:
         m_fields[accessModifier].push_back(unit);
     }
 
+    std::string compile(unsigned int level = 0) const {
+        throw std::runtime_error("Not supported");
+    }
+
 protected:
     std::string getName() const {
         return m_name;
@@ -129,6 +135,10 @@ const std::vector<std::string> ClassUnit::ACCESS_MODIFIERS = {"public", "protect
 class PrintOperatorUnit : public Unit {
 public:    
     explicit PrintOperatorUnit(const std::string& text) : m_text(text) {}
+
+    std::string compile(unsigned int level = 0) const {
+        throw std::runtime_error("Not supported");
+    }
 
 protected:
     std::string getText() const {
