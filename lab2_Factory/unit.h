@@ -97,7 +97,7 @@ public:
         if (flags & MethodUnit::PUBLIC) {
             accessModifier = PUBLIC;
         } else if (flags & MethodUnit::PROTECTED) {
-            accessModifier = PRIVATE;
+            accessModifier = PROTECTED;
         } else if (flags & MethodUnit::PRIVATE_PROTECTED) {
             accessModifier = PRIVATE_PROTECTED;
         } else if (flags & MethodUnit::INTERNAL) {
